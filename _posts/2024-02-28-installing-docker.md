@@ -7,12 +7,27 @@ tags: [docker]
 image: /assets/img/installing-docker/preview.png
 ---
 
+## What is Docker?
+Docker is a piece of software that runs on your machine that allows you to run *containers*. Containers are small applications that run isolated from each other. They can prepend to any task a full computer could, because inside the container, there usually is a whole operating system running (most likely a flavour of Linux). While it allows you to run virtualised operating systems, Docker is __not__ a hypervisor. It's an isolator.
+
+It's important to note that containers are not specific to Docker, containerisation is standardised. You may also have heard about Kubernetes or Podman, which use the exact same containers available to run with Docker.
+
+Containerisation of applications has become a turning point in on-demand scalability of infrastructure. In the case of a homelab, containerisation allows us to develop, build and share applications extremely quickly and easily, and avoid the allmighty "but it works on my machine".
+
+If it works on your machine and not the client's machine, then we ship your machine to the client, using Docker.
+#### Docker Compose
+`Compose` is an extension of Docker, that allows you to declare infrastructure as code. Instead of running commands in the terminal, Compose uses the YAML language in a text file to declare containers, networks, and volumes, and create everything all at once upon reading the file.
+
 ## Installing Docker
 
-For a basic install, I'd recommend you use the convenience script, that does everything for you. This document may not be up to date at the time of reading, so I'd suggest you consult [the official Docker documentation on the convenience script](https://docs.docker.com/engine/install/debian/#install-using-the-convenience-script).
+For a basic install, I'd recommend you use the convenience script, that does everything for you. It will pull the necessary resources, install both Docker and Docker compose, and clean up after itself.
+
+This document may not be up to date at the time of reading, so I'd suggest you consult [the official Docker documentation on the convenience script](https://docs.docker.com/engine/install/debian/#install-using-the-convenience-script).
 
 ```bash
+# Download and save the convenience script
 curl -fsSL https://get.docker.com -o get-docker.sh
+# Perform a dry run to make sure everything is in order
 sudo sh get-docker.sh --dry-run
 ```
 Once you have verified the output of the command, run the second one without `--dry-run`
@@ -37,7 +52,7 @@ sudo usermod -aG docker $USER
 If you run a VM, reboot it for the privileges to apply correctly. Sometimes a simple log off/log on can suffice, most of the time, you need to reboot.
 
 
-## Running a first container
+## Running your first container
 Once rebooted and logged in, to test your installation, run the following command
 
 ```bash
@@ -73,9 +88,12 @@ For more examples and ideas, visit:
 
 
 ## Automatically start containers on boot
-If you run Debian like I do, the docker daemon will start automatically on machine boot, and start all your containers (if any). If you do not run a Debian-based distro, you explicitely need to tell `systemd` to start the daemon (if your distro uses `systemd`)
+If you run Debian like I do, the docker daemon will start automatically on machine boot, and start all the containers that were running before you last powered off the machine (if any). If you do not run a Debian-based distro, you explicitely need to tell `systemd` to start the daemon (if your distro uses `systemd`)
 
 ```bash
 sudo systemctl enable docker.service
 sudo systemctl enable containerd.service
 ```
+
+> Docker and Docker Compose are now installed and working, good job!
+{: .prompt-tip}
