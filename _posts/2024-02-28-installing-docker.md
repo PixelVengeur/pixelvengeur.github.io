@@ -22,6 +22,9 @@ If it works on your machine and not the client's machine, then we ship your mach
 
 For a basic install, I'd recommend you use the convenience script, that does everything for you. It will pull the necessary resources, install both Docker and Docker compose, and clean up after itself.
 
+> The Docker convenience script does not work on RHEL distributions, including Red Hat, Fedora, CentOS Stream and Rocky Linux. If you are running one of those distributions, follow [these instructions](https://docs.rockylinux.org/gemstones/containers/docker/)
+{: .prompt-warning}
+
 This document may not be up to date at the time of reading, so I'd suggest you consult [the official Docker documentation on the convenience script](https://docs.docker.com/engine/install/debian/#install-using-the-convenience-script).
 
 ```bash

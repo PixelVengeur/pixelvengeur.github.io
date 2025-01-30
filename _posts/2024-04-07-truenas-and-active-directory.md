@@ -4,11 +4,11 @@ title: Truenas, Active Directory and Linux permissions
 date: 2024-04-07 21:27 +0200
 categories: []
 tags: []
-image: 
+image: /assets/img/truenas-and-active-directory/cover.png
 published: true
 mermaid: true
 ---
-## Introduction
+
 Strap in cause this one's a doozy.
 
 In this writeup, I'm detailing how I set up centralised authentication to Windows and Linux clients, using a Windows Server VM, running Active Directory. I'll also use said Active Directory to manage access rights to datasets in TrueNAS Scale 23 (Cobia), as well as *lightly* touch upon how Linux permissions work. Just a little.
@@ -88,7 +88,7 @@ With only those three "people" we've covered anyone that could log in to an Linu
 ### The `execute` permission
 The `execute` permission behaves in two ways, depending on whether the entry is a file. <br>
 In the case of a file, it dictates whether someone can execute the file, which could be a script, or compiled binary code.
-In the case of a folder, the `x` permission allows us to open the folder, view what's in the folder, and navigate through. But that doesn't mean we can view the content of the files is. It does not intuitively make sense, but imagine the following file system:
+In the case of a folder, the `x` permission allows us to open the folder, view what's in the folder, and navigate through. But that doesn't mean we can view the content of the files. It does not intuitively make sense, but imagine the following file system:
 
 ```shell
 .
@@ -183,7 +183,7 @@ uid=1002(bob) gid=1002(bob) groups=1002(bob)
 
 Then all permissions will be mismatched.
 - The `root` user will get its permissions matched properly, because UID 0 on the client is also UID 0 on the server. All good so far.
-- If `bob` of UID 1003 on the client wants to access data on the server, the server will look for permissions for UID 1003, which doesn't exist on the server. Thus, `bob` will be put in the `everyone else` bucket.
+- If `bob` of UID 1002 on the client wants to access data on the server, the server will look for permissions for UID 1002, which doesn't exist on the server. Thus, `bob` will be put in the `everyone else` bucket.
 - If `alice` of UID 1000 on the client connects, she will get the permissions of UID 1000 on the server, aka `bob`.
 - And if `joseph` wants to do the same, he will inherit `alice`'s permissions on the server.
 
@@ -194,20 +194,20 @@ Something that is common to both NFS and SMB, is that the user on the machine ne
 
 If you `mkdir` a folder, it doesn't matter the group owner and user owner of it, when you `mount` a share to said folder, it will override those properties to use the UID and GID of the user that mounted the share. If your share is mounted at boot (as I like to do myself), it will be `root root`. Unless you do everything as root (!), then you'll be put in the `everyone else` bucket when accessing files in the share. You might or might not be OK with that, but it is something to keep in mind if you get write errors on your share.
 
-One last thing and I'm done with Linux permissions I swear. <br> If you run containers, via Docker for example, each container is running as a certain user inside the container. If you mount an NFS share, or an SMB share, via a docker compose file for example, the same UID/GID matching problems apply. And maybe even more problems, because the user inside the container might need to access files on the host system as well, where those checks will also be performed.
+One last thing and I'm done with Linux permissions I swear: <br> If you run containers, each container is running as a certain user inside the container. If you mount an NFS share, or an SMB share, via a docker compose file for example, the same UID/GID matching problems apply. And maybe even more problems, because the user inside the container might need to access files on the host system as well, where those checks will also be performed.
 
 All of these reasons are why a central authentication system was the solution I believed I needed for my issues.
 
 ## Active Directory
 ### What is it?
-Active Directory is Microsoft's souped up version of LDAP (**L**ightweight **D**irectory **A**ccess **P**rotocol). It's a Windows Server role that allows for central management of users and machines in a Domain. Key features include setting permissions on resources (be they virtual like file shares or physical like printers), automatically configuring newly joined Windows machines to your liking, as well as managing identification and authentication. And this last part is what I am personally interested in.
+Active Directory is Microsoft's souped up version of LDAP (**L**ightweight **D**irectory **A**ccess **P**rotocol). It's a Windows Server role that allows for central management of users and machines in a Domain. Key features include setting permissions on resources (be they virtual resources like files in network shares, or physical resources like printers), automatically configuring newly joined Windows machines to your liking, as well as managing identification and authentication. And this last part is what I am personally interested in.
 
 ### Deploying Active Directory
 In order to use Active Directory, you will need a Windows Server machine, and thus, a Windows Server License. I am lucky enough to get offshoots from work, but in the case of almost anyone else, you will be limited to either the 180 days trial version (renewable up to 5 times for a total of 3 years using `slmgr /rearm`)... Or you could sail the high seas :pirate_flag:. You don't need the Datacenter edition license, the only extra thing it does is allow for unlimited virtualisation, which we won't use anyway. It doesn't change anything if you do get it though.
 
-Either way, get the most recent version you can get (2016, 2019 or even 2022). Active Directory is a thing since Windows Server 2000, but the older the version, the least secure it is, and the least likely it is to be compatible with other things you might want to link it with. Provision about a 60 GB hard drive for it, if you make it a VM.
+Either way, get the most recent version you can get (2016, 2019, 2022 or even 2025). Active Directory is a thing since Windows Server 2000, but the older the version, the least secure it is, and the least likely it is to be compatible with other things you might want to link it with. Provision about a 60 GB hard drive for it, if you make it a VM.
 
-Once you have your Windows Server installed (with a desktop environment), and optionally activated its license, the first thing I'd do is look for updates. Then I'd set a static IP for that machine. Do it on your DHCP server, but do it on the machine too. If power gets cut out and the machine boots back up before your DHCP server finishes initialising, it will get its adress anyway. Then set a hostname in Server Manager, and you're good to start.
+Once you have your Windows Server installed (with a desktop environment), and optionally activated its license, the first thing I'd do is look for updates. Then I'd set a static IP for that machine. Do it on your DHCP server, but do it on the machine too. If power gets cut out and the machine boots back up before your DHCP server finishes initialising, it will still be adressible via IP. Then set a hostname in Server Manager, and you're good to start.
 
 > To set a static IP, execute `ncpa.cpl`, right click your NIC and choose `Properties`, `Internet Protocol Version 4`, `Use the following IP address` and set the address, netmask and gateway you wish there
 {: .prompt-tip}
@@ -302,7 +302,7 @@ Join the domain
 
 To check that the machine is correctly enrolled into the domain, try to log in with a domain user. You could either
    - Log out of the machine, and log back in using `user@domain`
-   - Create an SSH connection, using the `ssh DOMAIN\user@ip` template
+   - Create an SSH connection from another machine to this one, using the `ssh DOMAIN\user@ip` template
      ```bash
      ssh MYHOMELAB\Administrator@NAS-Backup-1.myhomelab.net 
      
@@ -325,7 +325,7 @@ To check that the machine is correctly enrolled into the domain, try to log in w
 Since the access rights to a folder are changed when mounting a network share to said folder, who creates the folder in the first place does not matter. To change the access rights, you pass arguments with decimal permission masks to the `mount` command.
 
 #### Decimal permissions
-They're shorthand representations of the `rwx` values of a file or directory. Each letter represent a digit in binary form. If it's present it's a binary 1, if not it's a 0. The three of them form a three-digits binary number that we convert to decimal.
+They're shorthand representations of the `rwx` values of a file or directory. Each letter represents a digit in binary form. If it's present it's a binary 1, if not it's a 0. The three of them form a three-digits binary number that we convert to decimal.
 `r` equals a 4, `w` equals a 2 and `x` equals a 1. Add the numbers together to get the permissions you want.
 
 ```bash
@@ -347,7 +347,7 @@ As mentioned previously, I have switched to only using SMB, since NFS doesn't su
    ```bash
    $ mkdir /mnt/example
    ```
-2. Save your login credentials to a file. I save mine in /root to prevent accidental edits (you never know...)
+2. Save your login credentials to a file. I save mine in /root to prevent accidental edits, and change the file's permissions to only be readable (you never know...)
    ```shell
    $ sudo nano /root/.smb_user_credentials
    # The leading . is to hide the file
@@ -357,6 +357,8 @@ As mentioned previously, I have switched to only using SMB, since NFS doesn't su
    username=whatever
    password=super-secret
    domain=MYHOMELAB
+
+   $ sudo chmod 400 /root/.smb_user_credentials
    ```
 3. I like my shares to be mounted on boot, so I will add an entry into `/etc/fstab`.<br>
    I want to see the content of the `documents` share on my NAS, whose address is 192.168.0.100, and I'd like to have them in the folder `/mnt/example`.
@@ -372,7 +374,7 @@ As mentioned previously, I have switched to only using SMB, since NFS doesn't su
    - `x-systemd.automount` mounts the share at boot
    - `_netdev` delays the mount operation until network is operational
    - `dirmode` is the decimal permission mask that will be applied to the mount folder 
-   - `uid` specifies the UID of the userowner of the folder
+   - `uid` specifies the UID of the user owner of the folder
    - `gid` would specify the GID of the group owner of the folder
       - If you run containers, make sure the owner of the folder has the same UID as the container that will need to `rw` to the folder. Some apps need `rw` access to the share, so if your container runs as user 1000 (by default) but `root` (UID 0) owns the folder, it might not be able to write to it. If none is specified, it defaults to UID=0 GID=0, thus `root root`.
 
