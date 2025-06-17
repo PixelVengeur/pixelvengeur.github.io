@@ -18,7 +18,7 @@ platforms:
   #
   # - type: Linkedin
   #   icon: "fab fa-linkedin"
-  #   link: "https://www.linkedin.com/sharing/share-offsite/?url=URL"
+  #   link: "https://www.linkedin.com/feed/?shareActive=true&shareUrl=URL"
   #
   # - type: Weibo
   #   icon: "fab fa-weibo"
@@ -48,6 +48,3 @@ platforms:
   # - type: Threads
   #   icon: "fa-brands fa-square-threads"
   #   link: "https://www.threads.net/intent/post?text=TITLE%20URL"
-
-#  Sharing options at the bottom of the post.
-#  Icons from <https://fontawesome.com/>
