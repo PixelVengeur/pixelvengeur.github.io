@@ -5,7 +5,7 @@ date: 2024-02-29 21:34 +0100
 categories: [Tutorial, Self-hosted]
 tags: [linux]
 image: 
-published: true
+published: false
 ---
 
 Automating the configuration and installation of Debian with a preseed file
@@ -13,6 +13,8 @@ Automating the configuration and installation of Debian with a preseed file
 ## What this will cover
 
 ## Debian preseed files
+
+## Ansible
 
 ### Documentation
 

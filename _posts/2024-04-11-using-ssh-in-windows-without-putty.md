@@ -11,9 +11,9 @@ published: true
 A short and sweet brief on how to use SSH commands in Windows Terminal (available in Windows 10 and up), without the use of a third-party terminal, like PuTTY.
 
 ## Why do we use PuTTY?
-Because it's easy to recommend, and to use. It's a historical piece of software that has been present for so long that it is a staple of forum posts, Reddit comments and other YouTube videos when tackling SSH connections. So why change that habit?
+Because it's easy to recommend, and to use. It's a historical piece of software that has been present for so long that it is a staple of forum posts, Reddit comments and other YouTube videos, when tackling SSH connections. So why change that habit?
 
-I personally like having features embedded in my operating system. While I appreciate how versatile and customisable a Linux installation can be, there are things that are not present in barebones installs that I need, which is in part why I learned to use preseed files to [automate my Linux installations]({% post_url 2024-02-29-automating-debian-install %}). On the contrary, there are features built into Windows that are available, but not turned on by default, which leaves a spot open for third-party software to come into play, and an SSH client is one of those features.
+I personally like having features embedded in my operating system. While I appreciate how versatile and customisable a Linux installation can be, there are things that are not present in barebones installs that I need, which is in part why I learned to use preseed files to automate my Linux installations. On the contrary, there are features built into Windows that are available, but not turned on by default, which leaves a spot open for third-party software to come into play, and an SSH client is one of those features.
 
 ## Turning on the Windows SSH client
 The procedure is the same for Windows 10 and 11. The screenshots were capturd on Windows Server 2022, which is visually the same as Windows 10.

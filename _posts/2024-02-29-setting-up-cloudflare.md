@@ -6,7 +6,7 @@ categories: [Tutorial]
 tags: [networking, cloudflare]
 mermaid: true
 image: /assets/img/setting-up-cloudflare/preview.png
-# published: false
+published: true
 ---
 
 ## Disclaimer
